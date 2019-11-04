@@ -12,6 +12,18 @@
     state: "restarted"
   become: true
 
+- name: enable squid
+  service:
+    name: "squid"
+    enabled: yes
+  become: true
+- name: enable squid3
+  service:
+    name: "squid3"
+    enabled: yes
+  become: true
+
+
 - name: reload haproxy
   service:
     name: "haproxy"

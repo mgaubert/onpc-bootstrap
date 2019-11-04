@@ -25,4 +25,5 @@
 - name: redis
   scm: git
   src: https://github.com/opennext-io/ansible-redis.git
-
+- name: nginx
+  src: geerlingguy.nginx
