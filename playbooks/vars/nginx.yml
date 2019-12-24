@@ -18,3 +18,190 @@
 ## The installation and configuration of Nginx as a reverse proxy
 #  to access OpenNext services UIs (ex. Horizon, Grafana, Kibana, ...).
 reverse_nginx_enabled: "{{ onpc_reverse_proxy | default(false) | bool }}"
+
+nginx_remove_default_vhost: true
+
+nginx_user: nginx
+
+nginx_vhost_template: ../etc/nginx/templates/vhost.j2
+
+nginx_vhosts:
+  - listen: "{{ onpc_reverse_proxy_ip }}:80"
+    server_name: "{{ onpc_external_lb_fqdn }} {{ onpc_reverse_proxy_ip }}"
+    access_log: "/var/log/nginx/openstack_access.log"
+    error_log: "/var/log/nginx/openstack_error.log"
+    state: present
+    template: "{{ nginx_vhost_template }}"
+    filename: "openstack_http.conf"
+    extra_parameters: |
+      return 301 https://$host$request_uri;
+  - listen: "{{ onpc_reverse_proxy_ip }}:443 ssl"
+    server_name: "{{ onpc_external_lb_fqdn }} {{ onpc_reverse_proxy_ip }}"
+    access_log: "/var/log/nginx/openstack_ssl_access.log"
+    error_log: "/var/log/nginx/openstack_ssl_error.log"
+    state: present
+    template: "{{ nginx_vhost_template }}"
+    filename: "openstack_https.conf"
+    extra_parameters: |
+      ssl_protocols       TLSv1.2 TLSv1.3;
+      ssl_ciphers         AES128-SHA:AES256-SHA:RC4-SHA:DES-CBC3-SHA:RC4-MD5;
+      ssl_certificate     /etc/pki/tls/certs/openstack.crt;
+      ssl_certificate_key /etc/pki/tls/private/openstack.key;
+      ssl_session_cache   shared:SSL:10m;
+      ssl_session_timeout 10m;
+    locations:
+      - path: "/identity/"
+        extra_parameters: |
+          sub_filter 'https://$host/' 'https://$host/identity/';
+          sub_filter_last_modified on;
+          sub_filter_once on;
+          sub_filter_types *;
+          proxy_pass http://{{ external_vip_addr }}:5000/;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header Host $host;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto https;
+      - path: "/volume/"
+        extra_parameters: |
+          sub_filter 'https://$host/' 'https://$host/volume/';
+          sub_filter_last_modified on;
+          sub_filter_once on;
+          sub_filter_types *;
+          proxy_pass http://{{ external_vip_addr }}:8776/;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header Host $host;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto https;
+      - path: "/orchestration/"
+        extra_parameters: |
+          sub_filter 'https://$host/' 'https://$host/orchestration/';
+          sub_filter_last_modified on;
+          sub_filter_once on;
+          sub_filter_types *;
+          proxy_pass http://{{ external_vip_addr }}:8004/;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header Host $host;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto https;
+      - path: "/compute/"
+        extra_parameters: |
+          sub_filter 'https://$host/' 'https://$host/compute/';
+          sub_filter_last_modified on;
+          sub_filter_once on;
+          sub_filter_types *;
+          proxy_pass http://{{ external_vip_addr }}:8774/;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header Host $host;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto https;
+      - path: "/placement/"
+        extra_parameters: |
+          sub_filter 'https://$host/' 'https://$host/placement/';
+          sub_filter_last_modified on;
+          sub_filter_once on;
+          sub_filter_types *;
+          proxy_pass http://{{ external_vip_addr }}:8780/;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header Host $host;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto https;
+      - path: "/object-store/"
+        extra_parameters: |
+          sub_filter 'https://$host/' 'https://$host/object-store/';
+          sub_filter_last_modified on;
+          sub_filter_once on;
+          sub_filter_types *;
+          proxy_pass http://{{ external_vip_addr }}:8080/;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header Host $host;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto https;
+      - path: "/image/"
+        extra_parameters: |
+          sub_filter 'https://$host/' 'https://$host/image/';
+          sub_filter_last_modified on;
+          sub_filter_once on;
+          sub_filter_types *;
+          proxy_pass http://{{ external_vip_addr }}:9292/;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header Host $host;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto https;
+      - path: "/network/"
+        extra_parameters: |
+          sub_filter 'https://$host/' 'https://$host/network/';
+          sub_filter_last_modified on;
+          sub_filter_once on;
+          sub_filter_types *;
+          proxy_pass http://{{ external_vip_addr }}:9696/;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header Host $host;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto https;
+      - path: "/cloudformation/"
+        extra_parameters: |
+          sub_filter 'https://$host/' 'https://$host/cloudformation/';
+          sub_filter_last_modified on;
+          sub_filter_once on;
+          sub_filter_types *;
+          proxy_pass http://{{ external_vip_addr }}:8000/;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header Host $host;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto https;
+      - path: "/"
+        extra_parameters: |
+          sub_filter 'http://{{ external_vip_addr }}/' 'https://$host/';
+          sub_filter 'https://{{ external_vip_addr }}/' 'https://$host/';
+          sub_filter 'http://$host/' 'https://$host/';
+          sub_filter 'https://$host/' 'https://$host/';
+          sub_filter_last_modified on;
+          sub_filter_once on;
+          sub_filter_types *;
+          proxy_pass http://{{ external_vip_addr }}/;
+          proxy_request_buffering off;
+          proxy_http_version 1.1;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection "upgrade";
+          proxy_set_header Host $host;
+          proxy_set_header Origin https://$host;
+          proxy_set_header Accept-Encoding "";
+          proxy_set_header X-Real-IP $remote_addr;
+          #proxy_set_header X-Forwarded-Host $host;
+          proxy_set_header X-Forwarded-Proto https;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_connect_timeout 90;
+          proxy_send_timeout 90;
+          proxy_read_timeout 90;
+  - listen: "{{ onpc_reverse_proxy_ip }}:6082 ssl"
+    server_name: "{{ onpc_external_lb_fqdn }} {{ onpc_reverse_proxy_ip }}"
+    access_log: "/var/log/nginx/openstack_spice_access.log"
+    error_log: "/var/log/nginx/openstack_spice_error.log"
+    state: present
+    template: "{{ nginx_vhost_template }}"
+    filename: "openstack_spice.conf"
+    extra_parameters: |
+      ssl_protocols       TLSv1.2 TLSv1.3;
+      ssl_ciphers         AES128-SHA:AES256-SHA:RC4-SHA:DES-CBC3-SHA:RC4-MD5;
+      ssl_certificate     /etc/pki/tls/certs/openstack.crt;
+      ssl_certificate_key /etc/pki/tls/private/openstack.key;
+      ssl_session_cache   shared:SSL:10m;
+      ssl_session_timeout 10m;
+    locations:
+      - path: /
+        extra_parameters: |
+          proxy_pass http://{{ external_vip_addr }}:6082/;
+          proxy_request_buffering off;
+          proxy_http_version 1.1;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection "upgrade";
+          proxy_set_header Host $host;
+          proxy_set_header Origin https://$host;
+          proxy_set_header Accept-Encoding "";
+          proxy_set_header X-Real-IP $remote_addr;
+          #proxy_set_header X-Forwarded-Host $host;
+          proxy_set_header X-Forwarded-Proto https;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_connect_timeout 90;
+          proxy_send_timeout 90;
+          proxy_read_timeout 90;

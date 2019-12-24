@@ -39,7 +39,7 @@ debug: "{{ onpc_debug_enabled | default(False) }}"
 {% endraw %}
 
 service_region: "{{ onpc_region_name }}"
-haproxy_ssl: true
+haproxy_ssl: {% if onpc_reverse_proxy is defined and onpc_reverse_proxy %}false{% else %}true{% endif %}
 
 ## Installation method for OpenStack services
 # Default option (source) is to install the OpenStack services using PIP
@@ -291,7 +291,7 @@ heat_heat_conf_overrides:
     use_syslog: True
     syslog_log_facility: LOG_LOCAL7
 
-openstack_service_publicuri_proto: "http{% if onpc_reverse_proxy_ssl is defined and onpc_reverse_proxy_ssl %}s{% end %}"
+openstack_service_publicuri_proto: "http{% if onpc_reverse_proxy_ssl is defined and onpc_reverse_proxy_ssl %}s{% endif %}"
 
 {% if onpc_reverse_proxy is defined and onpc_reverse_proxy %}
 
@@ -299,7 +299,7 @@ external_lb_vip_fqdn: "{{ onpc_external_lb_fqdn }}"
 
 {% raw %}
 keystone_service_publicuri: "{{ keystone_service_publicuri_proto }}://{{ external_lb_vip_fqdn }}/identity"
-nova_service_publicuri: "{{ nova_service_publicuri_proto }}://{{ external_lb_vip_fqdn }}/nova"
+nova_service_publicuri: "{{ nova_service_publicuri_proto }}://{{ external_lb_vip_fqdn }}/compute"
 nova_placement_service_publicuri: "{{ nova_placement_service_publicuri_proto }}://{{ external_lb_vip_fqdn }}/placement"
 swift_service_publicuri: "{{ swift_service_publicuri_proto }}://{{ external_lb_vip_fqdn }}/object-store"
 heat_service_publicuri: "{{ heat_service_publicuri_proto }}://{{ external_lb_vip_fqdn }}/orchestration"
@@ -312,4 +312,4 @@ neutron_service_publicuri: "{{ neutron_service_publicuri_proto }}://{{ external_
 glance_service_publicurl: "{{ glance_service_publicuri }}"
 radosgw_service_publicuri: "{{ radosgw_service_publicuri_proto }}://{{ external_lb_vip_fqdn }}"
 {% endraw %}
-{% end %}
+{% endif %}

@@ -31,6 +31,7 @@ onpc_partitions_check: true
 onpc_reverse_proxy: false
 onpc_external_lb_fqdn: example.com
 onpc_reverse_proxy_ssl: true
+onpc_reverse_proxy_ip: "{{ (api_network.split('.')[:-1] + ['199']) | join('.') }}"
 
 # The variable onpc_environment_name is used to tag the monitoring metrics
 # and alerts. To be removed.

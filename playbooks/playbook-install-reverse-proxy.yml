@@ -1,0 +1,39 @@
+---
+  # Copyright (c) 2019, Mathieu Gaubert <mathieu.gaubert@metanext.com>
+
+  #
+  # Licensed under the Apache License, Version 2.0 (the "License");
+  # you may not use this file except in compliance with the License.
+  # You may obtain a copy of the License at
+  #
+  #     http://www.apache.org/licenses/LICENSE-2.0
+  #
+  # Unless required by applicable law or agreed to in writing, software
+  # distributed under the License is distributed on an "AS IS" BASIS,
+  # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  # See the License for the specific language governing permissions and
+  # limitations under the License.
+- name: Install Nginx Reverse Proxy
+  hosts: localhost
+  connection: local
+  become: true
+  become_user: root
+
+  vars_files:
+    - vars/main.yml
+    - vars/nginx.yml
+
+  pre_tasks:
+    - name: Assert that the Ansible version meets requirements
+      assert:
+        that: "ansible_version.full is version_compare('2.7', '>=')"
+        msg: >-
+          "You must upgrade Ansible version to 2.7 or greater (current version is {{ ansible_version.full }})"
+
+    - name: Setup networking facts
+      import_tasks: tasks/setup-networking-facts.yml
+      tags: always
+
+  roles:
+    - role: nginx
+      when: reverse_nginx_enabled | bool

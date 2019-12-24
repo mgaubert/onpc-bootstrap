@@ -28,4 +28,6 @@
 - name: influxdb
   scm: git
   src: https://github.com/opennext-io/ansible-influxdb.git
-
+- name: nginx
+  scm: git
+  src: https://github.com/geerlingguy/ansible-role-nginx.git
