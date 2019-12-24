@@ -28,6 +28,10 @@ onpc_region_name: "RegionOne"
 onpc_multidomain_support: false
 onpc_partitions_check: true
 
+onpc_reverse_proxy: false
+onpc_external_lb_fqdn: example.com
+onpc_reverse_proxy_ssl: true
+
 # The variable onpc_environment_name is used to tag the monitoring metrics
 # and alerts. To be removed.
 # onpc_environment_name: "{{ environment_name | default(onpc_infra_domain, true) }}"

@@ -17,4 +17,4 @@
 
 ## The installation and configuration of Nginx as a reverse proxy
 #  to access OpenNext services UIs (ex. Horizon, Grafana, Kibana, ...).
-reverse_nginx_enabled: "{{ opennext_reverse_nginx | default(false) | bool }}"
+reverse_nginx_enabled: "{{ onpc_reverse_proxy | default(false) | bool }}"
