@@ -247,6 +247,29 @@ deployment_environment_variables:
 # Increase delay for the ssh connection check if desired.
 ssh_delay: "{{ onpc_ssh_delay | default(5) }}"
 
+openstack_service_publicuri_proto: "http{% if onpc_reverse_proxy_ssl is defined and onpc_reverse_proxy_ssl %}s{% endif %}"
+
+{% if onpc_reverse_proxy is defined and onpc_reverse_proxy %}
+
+external_lb_vip_fqdn: "{{ onpc_external_lb_fqdn }}"
+
+{% raw %}
+keystone_service_publicuri: "{{ keystone_service_publicuri_proto }}://{{ external_lb_vip_fqdn }}/identity"
+nova_service_publicuri: "{{ nova_service_publicuri_proto }}://{{ external_lb_vip_fqdn }}/compute"
+nova_placement_service_publicuri: "{{ nova_placement_service_publicuri_proto }}://{{ external_lb_vip_fqdn }}/placement"
+swift_service_publicuri: "{{ swift_service_publicuri_proto }}://{{ external_lb_vip_fqdn }}/object-store"
+heat_service_publicuri: "{{ heat_service_publicuri_proto }}://{{ external_lb_vip_fqdn }}/orchestration"
+heat_cfn_service_publicuri: "{{ heat_cfn_service_publicuri_proto }}://{{ external_lb_vip_fqdn }}/cloudformation"
+glance_service_publicuri: "{{ glance_service_publicuri_proto }}://{{ external_lb_vip_fqdn }}/image"
+cinder_service_publicuri: "{{ cinder_service_publicuri_proto }}://{{ external_lb_vip_fqdn }}/volume"
+cinder_service_v2_publicuri: "{{ cinder_service_v2_publicuri_proto }}://{{ external_lb_vip_fqdn }}/volume"
+cinder_service_v3_publicuri: "{{ cinder_service_v3_publicuri_proto }}://{{ external_lb_vip_fqdn }}/volume"
+neutron_service_publicuri: "{{ neutron_service_publicuri_proto }}://{{ external_lb_vip_fqdn }}/network"
+glance_service_publicurl: "{{ glance_service_publicuri }}"
+radosgw_service_publicuri: "{{ radosgw_service_publicuri_proto }}://{{ external_lb_vip_fqdn }}"
+{% endraw %}
+{% endif %}
+
 # Conf Overrides
 
 nova_nova_conf_overrides:
@@ -290,26 +313,3 @@ heat_heat_conf_overrides:
   DEFAULT:
     use_syslog: True
     syslog_log_facility: LOG_LOCAL7
-
-openstack_service_publicuri_proto: "http{% if onpc_reverse_proxy_ssl is defined and onpc_reverse_proxy_ssl %}s{% endif %}"
-
-{% if onpc_reverse_proxy is defined and onpc_reverse_proxy %}
-
-external_lb_vip_fqdn: "{{ onpc_external_lb_fqdn }}"
-
-{% raw %}
-keystone_service_publicuri: "{{ keystone_service_publicuri_proto }}://{{ external_lb_vip_fqdn }}/identity"
-nova_service_publicuri: "{{ nova_service_publicuri_proto }}://{{ external_lb_vip_fqdn }}/compute"
-nova_placement_service_publicuri: "{{ nova_placement_service_publicuri_proto }}://{{ external_lb_vip_fqdn }}/placement"
-swift_service_publicuri: "{{ swift_service_publicuri_proto }}://{{ external_lb_vip_fqdn }}/object-store"
-heat_service_publicuri: "{{ heat_service_publicuri_proto }}://{{ external_lb_vip_fqdn }}/orchestration"
-heat_cfn_service_publicuri: "{{ heat_cfn_service_publicuri_proto }}://{{ external_lb_vip_fqdn }}/cloudformation"
-glance_service_publicuri: "{{ glance_service_publicuri_proto }}://{{ external_lb_vip_fqdn }}/image"
-cinder_service_publicuri: "{{ cinder_service_publicuri_proto }}://{{ external_lb_vip_fqdn }}/volume"
-cinder_service_v2_publicuri: "{{ cinder_service_v2_publicuri_proto }}://{{ external_lb_vip_fqdn }}/volume"
-cinder_service_v3_publicuri: "{{ cinder_service_v3_publicuri_proto }}://{{ external_lb_vip_fqdn }}/volume"
-neutron_service_publicuri: "{{ neutron_service_publicuri_proto }}://{{ external_lb_vip_fqdn }}/network"
-glance_service_publicurl: "{{ glance_service_publicuri }}"
-radosgw_service_publicuri: "{{ radosgw_service_publicuri_proto }}://{{ external_lb_vip_fqdn }}"
-{% endraw %}
-{% endif %}

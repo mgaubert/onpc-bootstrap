@@ -29,8 +29,12 @@ cobbler_web_user_pwd:
     password: "{{ cobbler_password }}"
 cobbler_default_time_zone: "Europe/Paris"
 cobbler_root_public_keys:
-  - "{{ oncp_root_public_key }}" 
+  - "{{ oncp_root_public_key }}"
 cobbler_forward_zones:
   - "{{ onpc_infra_domain }}"
 cobbler_reverse_zones:
   - "{{ management_network.split('.')[:-1] | join('.') }}"
+
+cobbler_web_listening_ip: {{ external_vip_addr }}
+cobbler_web_listening_port_http: 80
+cobbler_web_listening_port_https: 443
